@@ -1,0 +1,50 @@
+name: Revisar Código HTML, CSS y JS
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v3
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar linters
+        run: |
+          npm init -y
+          npm install --save-dev eslint@8 stylelint htmlhint
+
+      - name: Crear configuración de linters
+        run: |
+          echo '{
+            "env": {
+              "browser": true,
+              "es2021": true
+            },
+            "parserOptions": {
+              "ecmaVersion": 12
+            },
+            "rules": {
+              "no-unused-vars": "warn",
+              "no-undef": "error"
+            }
+          }' > .eslintrc.json
+
+          echo '{
+            "rules": {
+              "block-no-empty": true,
+              "color-no-invalid-hex": true,
+              "declaration-block-no-duplicate-properties": true
+            }
+          }' > .stylelintrc.json
+
+          echo '{}' > .htmlhintrc
+
+      - name: Ejecutar HTMLHint
+        run: npx htmlhint "*/.html"
